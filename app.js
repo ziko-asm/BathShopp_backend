@@ -78,6 +78,7 @@ const modalProductDetails = document.getElementById('modal-product-details');
 const cartItemsContainer = document.getElementById('cart-items');
 const cartCount = document.getElementById('cart-count');
 const cartTotal = document.getElementById('cart-total');
+const BACKEND_URL = "https://bathshop-api.onrender.com";
 
 // Məhsulları ekrana düzək
 function renderProducts() {
@@ -168,15 +169,49 @@ function toggleCart() {
 }
 
 // Sifarişi tamamla
-function checkoutOrder() {
+// Sifarişi tamamla
+async function checkoutOrder() {
     if (cart.length === 0) {
         alert('Səbətiniz boşdur!');
         return;
     }
-    alert('Sifarişiniz uğurla qəbul olundu! Operatorumuz ən qısa zamanda sizinlə əlaqə saxlayacaq.');
-    cart = [];
-    updateCart();
-    toggleCart();
+
+    // Müştəridən ad və telefon nömrəsini alırıq
+    const customerName = prompt("Adınız və Soyadınız:");
+    if (!customerName) return;
+
+    const customerPhone = prompt("Əlaqə nömrəniz:");
+    if (!customerPhone) return;
+
+    // Səbətdəki məhsulları bir mətndə toplayırıq
+    const itemsList = cart.map(item => `${item.name} (${item.price} AZN)`).join(", ");
+
+    try {
+        const response = await fetch("https://bathshop-api.onrender.com/send-order", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: customerName,
+                phone: customerPhone,
+                items: itemsList,
+                total_price: cartTotal.textContent
+            })
+        });
+
+        if (response.ok) {
+            alert('Sifarişiniz uğurla qəbul olundu! Operatorumuz ən qısa zamanda sizinlə əlaqə saxlayacaq.');
+            cart = [];
+            updateCart();
+            toggleCart();
+        } else {
+            alert('Sifariş göndərilərkən xəta baş verdi. Yenidən cəhd edin.');
+        }
+    } catch (error) {
+        console.error("Xəta:", error);
+        alert('Serverlə əlaqə qurularkən xəta baş verdi.');
+    }
 }
 
 // İlk açılışda çalışdır
