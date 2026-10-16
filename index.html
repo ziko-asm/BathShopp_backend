@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bathshop.az - Hamam və Banyo Aksessuarları</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Header / Naviqasiya -->
+    <header>
+        <div class="logo-container">
+            <img src="bathshop.jpeg" alt="Bath Shop Logo" class="site-logo">
+            <span class="domain-name">bathshop.az</span>
+        </div>
+        <div class="header-right">
+            <div class="location-badge">
+                <i class="fas fa-map-marker-alt"></i> Bakı, Azərbaycan
+            </div>
+            <div class="cart-btn" onclick="toggleCart()">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cart-count">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Əsas Banner -->
+    <!-- Əsas Banner -->
+    <section class="hero-banner">
+        <h1>Eviniz üçün Ən Keyfiyyətli Banyo Məhsulları</h1>
+        <p>Bakı daxili sürətli çatdırılma və rəsmi zəmanət | Əlaqə: 077 611 02 33</p>
+        <div class="hero-badges">
+            <div class="hero-chip"><i class="fas fa-truck"></i> Sürətli Çatdırılma</div>
+            <div class="hero-chip"><i class="fas fa-shield-alt"></i> Rəsmi Zəmanət</div>
+            <div class="hero-chip"><i class="fas fa-check-circle"></i> Orijinal Məhsullar</div>
+        </div>
+    </section>
+    
+    <!-- Məhsul Kataloqu -->
+    <main class="container">
+        <h2>Məhsullarımız</h2>
+        <div class="products-grid" id="products-container">
+            <!-- Məhsullar JavaScript ilə bura yüklənəcək -->
+        </div>
+    </main>
+
+    <!-- Məhsul Detal Modalı -->
+    <div class="modal" id="product-modal" onclick="if(event.target === this) closeProductModal()">
+        <div class="modal-content product-detail-content">
+            <button class="modal-close-btn" onclick="closeProductModal()">&times;</button>
+            <div id="modal-product-details">
+                <!-- JavaScript ilə dolacaq -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Səbət Modalı -->
+    <div class="cart-modal" id="cart-modal" onclick="if(event.target === this) toggleCart()">
+        <div class="cart-content">
+            <div class="cart-header">
+                <h3>Səbətiniz</h3>
+                <span class="close-btn" onclick="toggleCart()">&times;</span>
+            </div>
+            <div class="cart-items" id="cart-items">
+                <p>Səbətiniz boşdur.</p>
+            </div>
+            <div class="cart-footer">
+                <div class="total-price">Ümumi Məbləğ: <span id="cart-total">0.00</span> ₼</div>
+                <button class="checkout-btn" onclick="checkoutOrder()">Sifarişi Rəsmiləşdir</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
