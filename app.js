@@ -170,49 +170,92 @@ function toggleCart() {
 
 // Sifarişi tamamla
 // Sifarişi tamamla
+// Sifarişi tamamla
 async function checkoutOrder() {
+    const nameInput = document.getElementById('customer-name');
+    const phoneInput = document.getElementById('customer-phone');
+    const errorDiv = document.getElementById('checkout-error');
+
+    if (errorDiv) {
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+    }
+
     if (cart.length === 0) {
-        alert('Səbətiniz boşdur!');
+        if (errorDiv) {
+            errorDiv.textContent = 'Səbətiniz boşdur!';
+            errorDiv.style.display = 'block';
+        }
         return;
     }
 
-    // Müştəridən ad və telefon nömrəsini alırıq
-    const customerName = prompt("Adınız və Soyadınız:");
-    if (!customerName) return;
+    const customerName = nameInput ? nameInput.value.trim() : '';
+    const customerPhone = phoneInput ? phoneInput.value.trim() : '';
 
-    const customerPhone = prompt("Əlaqə nömrəniz:");
-    if (!customerPhone) return;
+    if (!customerName) {
+        if (errorDiv) {
+            errorDiv.textContent = 'Lütfən ad və soyadınızı daxil edin!';
+            errorDiv.style.display = 'block';
+        }
+        return;
+    }
 
-    // Səbətdəki məhsulları bir mətndə toplayırıq
-    const itemsList = cart.map(item => `${item.name} (${item.price} AZN)`).join(", ");
+    // Nömrənin dəqiq 10 rəqəm olması yoxlanılır (Məs: 0705642378)
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(customerPhone)) {
+        if (errorDiv) {
+            errorDiv.textContent = 'Nömrə dəqiq 10 rəqəmdən ibarət olmalıdır! (Məs: 0705642378)';
+            errorDiv.style.display = 'block';
+        }
+        return;
+    }
+
+    // Ümumi məbləği rəqəmə çeviririk
+    let numericTotal = 0;
+    if (typeof cartTotal !== 'undefined' && cartTotal.textContent) {
+        numericTotal = parseFloat(cartTotal.textContent.replace(/[^\d.]/g, '')) || 0;
+    }
+
+    // Sənin main.py-nın gözlədiyi dəqiq format
+    const orderData = {
+        name: customerName,
+        phone: customerPhone,
+        items: cart.map(item => ({
+            name: item.name,
+            price: item.price
+        })),
+        total: numericTotal
+    };
 
     try {
-        const response = await fetch("https://bathshop-api.onrender.com/send-order", {
+        const response = await fetch("https://bathshop-api.onrender.com/api/checkout", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                name: customerName,
-                phone: customerPhone,
-                items: itemsList,
-                total_price: cartTotal.textContent
-            })
+            body: JSON.stringify(orderData)
         });
 
+        const result = await response.json();
+
         if (response.ok) {
-            alert('Sifarişiniz uğurla qəbul olundu! Operatorumuz ən qısa zamanda sizinlə əlaqə saxlayacaq.');
+            alert('✅ Sifarişiniz uğurla qəbul olundu! Operatorumuz tezliklə sizinlə əlaqə saxlayacaq.');
             cart = [];
+            if (nameInput) nameInput.value = '';
+            if (phoneInput) phoneInput.value = '';
             updateCart();
             toggleCart();
         } else {
-            alert('Sifariş göndərilərkən xəta baş verdi. Yenidən cəhd edin.');
+            if (errorDiv) {
+                errorDiv.textContent = result.detail || 'Sifariş göndərilərkən xəta baş verdi.';
+                errorDiv.style.display = 'block';
+            }
         }
     } catch (error) {
         console.error("Xəta:", error);
-        alert('Serverlə əlaqə qurularkən xəta baş verdi.');
+        if (errorDiv) {
+            errorDiv.textContent = 'Serverlə əlaqə qurularkən xəta baş verdi.';
+            errorDiv.style.display = 'block';
+        }
     }
 }
-
-// İlk açılışda çalışdır
-renderProducts();

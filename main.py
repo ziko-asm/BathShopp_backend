@@ -5,7 +5,6 @@ import requests
 
 app = FastAPI(title="BathShop Secure Backend", version="1.0")
 
-# CORS tənzimlənməsi (frontend-dən gələn sorğular bloklanmasın deyə)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,10 +13,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Sənin BotFather-dən aldığın TƏZƏ Token
 TELEGRAM_BOT_TOKEN = "8704616357:AAFVt1mSspFtV00fAGQhhH7ZH5jYM7G9jKs"
-
-# Telegram ID-n (aşağıdakı addımda tapacağıq)
 CHAT_ID = "1089304401"
 
 class OrderModel(BaseModel):
