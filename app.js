@@ -14,7 +14,7 @@ const products = [
             "Göstəricilər: İstilik səviyyəsi üçün çoxpilləli LED işıqlar",
             "Qoşulma: Aşağı hissədən iki su xətti çıxışı üçün giriş/çıxış",
             "İstifadə sahəsi: Hamam, mətbəx və ya isti suya ehtiyac olan nöqtələrdə ani qızdırma",
-            "Üstünlüklər: Suyu dərhal qızdırır, yerə qənaət edən quruluş, sadə və intuitiv idarəetmə, tənzimlənən istilik səviyyələri"
+            "Üstünlüklər: Suyu dərhal qızdırır, yerə qənaət edən quruluş, sadə və intuitiv idarəetmə"
         ]
     },
     {
@@ -42,13 +42,13 @@ const products = [
         image: "mehsul3.jpeg",
         phone: "077-611-02-33",
         specs: [
-            "Növ: Qazla işləyən su qızdırıcısı (Spal)",
+            "Növ: Qazla işləyən su qızdırıcısı (Kalonka)",
             "Marka: CARDINAL",
             "Güc: 36 kW – mənzil və fərdi evlərdə sürətli və sabit isti su təminatı",
             "İdarəetmə Paneli: İki fırlanma düyməsi (alov/istilik tənzimləməsi və su axını)",
             "Göstəricilər: Ortada rəqəmsal LED göstərici",
             "Mexaniki tənzimləmə: İsti-soyuq dərəcə və alov gücünü dəqiq seçmək imkanı",
-            "Dizayn: Qapalı, kompakt təkqapılı korpus, divara asma üçün uyğun və təmiz ön paneldə havalandırma barmaqlığı",
+            "Dizayn: Qapalı, kompakt təkqapılı korpus, divara asma üçün uyğun",
             "İstifadə sahəsi: Məişətdə davamlı isti su ehtiyacı olan mətbəx və hamamlar"
         ]
     },
@@ -67,7 +67,6 @@ const products = [
             "Rejimlər: “Keep warm / heating” göstəriciləri ilə iş rejimləri",
             "Üstünlüklər: Enerji effektivliyi etiketi (yüksək sinif), təhlükəsiz və davamlı iş prinsipi",
             "Texniki xüsusiyyət: Mis/bronz boru sistemi",
-            "Dizayn: Kompakt divar tipli korpus, ön paneldə status ikonası və rəqəmsal idarəetmə paneli",
             "İstifadə sahəsi: Mətbəx və ya hamamda sabit isti su təminatı"
         ]
     },
@@ -105,11 +104,11 @@ const products = [
     }
 ];
 
-let cart = [];
+let cart = JSON.parse(localStorage.getItem('bathshop_cart')) || [];
 let currentCategory = 'all';
 let currentLang = 'az';
 
-// Tərcümələr luğəti (AZ, EN, RU)
+// Tərcümələr lüğəti (AZ, EN, RU)
 const translations = {
     az: {
         heroTitle: "Eviniz üçün Ən Keyfiyyətli Banyo Məhsulları",
@@ -123,12 +122,15 @@ const translations = {
         filterKombi: "Kombilər",
         detailsBtn: "Ətraflı",
         addToCart: "Səbətə at",
-        cartEmpty: "Səbətiniz boşdur.",
-        checkoutTitle: "Sifarişi Tamamla",
+        cartTitle: "Səbətiniz",
+        cartEmpty: "Səbətiniz hazırda boşdur.",
+        totalLabel: "Cəmi məbləğ:",
+        nameLabel: "Ad və Soyadınız:",
         namePlaceholder: "Məs: Əli Əliyev",
         phoneLabel: "Əlaqə nömrəniz:",
         completeBtn: "Sifarişi Təsdiq Et",
-        locationText: "Bakı, Azərbaycan"
+        locationText: "Bakı, Azərbaycan",
+        toastAdded: "Məhsul səbətə əlavə edildi!"
     },
     en: {
         heroTitle: "Best Quality Bathroom Products for Your Home",
@@ -142,12 +144,15 @@ const translations = {
         filterKombi: "Boilers",
         detailsBtn: "Details",
         addToCart: "Add to Cart",
-        cartEmpty: "Your cart is empty.",
-        checkoutTitle: "Complete Order",
+        cartTitle: "Your Cart",
+        cartEmpty: "Your cart is currently empty.",
+        totalLabel: "Total amount:",
+        nameLabel: "Full Name:",
         namePlaceholder: "Ex: Ali Aliyev",
         phoneLabel: "Your Phone Number:",
         completeBtn: "Confirm Order",
-        locationText: "Baku, Azerbaijan"
+        locationText: "Baku, Azerbaijan",
+        toastAdded: "Added to cart!"
     },
     ru: {
         heroTitle: "Лучшие товары для ванной для вашего дома",
@@ -157,16 +162,19 @@ const translations = {
         badge3: "Оригинальные товары",
         productsTitle: "Наши товары",
         filterAll: "Все",
-        filterHeater: "Обогреватели",
-        filterKombi: "Котлы",
+        filterHeater: "Водонагреватели",
+        filterKombi: "Котлы (Комби)",
         detailsBtn: "Подробнее",
         addToCart: "В корзину",
+        cartTitle: "Ваша корзина",
         cartEmpty: "Ваша корзина пуста.",
-        checkoutTitle: "Оформить заказ",
+        totalLabel: "Итого:",
+        nameLabel: "Имя и Фамилия:",
         namePlaceholder: "Пример: Али Алиев",
         phoneLabel: "Номер телефона:",
         completeBtn: "Подтвердить заказ",
-        locationText: "Баку, Азербайджан"
+        locationText: "Баку, Азербайджан",
+        toastAdded: "Товар добавлен в корзину!"
     }
 };
 
@@ -183,10 +191,11 @@ const BACKEND_URL = "https://bathshop-api.onrender.com";
 function filterProducts(category) {
     currentCategory = category;
     
-    // Düymələrin aktiv sinfini idarə edirik
     const buttons = document.querySelectorAll('.filter-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+    
+    const activeBtn = document.getElementById(`btn-${category}`);
+    if (activeBtn) activeBtn.classList.add('active');
 
     renderProducts();
 }
@@ -194,27 +203,37 @@ function filterProducts(category) {
 // Dil dəyişdirmə funksiyası
 function changeLanguage(lang) {
     currentLang = lang;
-    
-    // Dinamik olaraq mətnləri yeniləyirik
     const t = translations[lang];
     
-    if (document.getElementById('hero-title')) document.getElementById('hero-title').innerText = t.heroTitle;
-    if (document.getElementById('hero-sub')) document.getElementById('hero-sub').innerText = t.heroSub;
-    if (document.getElementById('products-title')) document.getElementById('products-title').innerText = t.productsTitle;
-    
-    // Filtrlərin adları
-    const btnAll = document.getElementById('btn-all');
-    const btnHeater = document.getElementById('btn-heater');
-    const btnKombi = document.getElementById('btn-kombi');
-    
-    if (btnAll) btnAll.innerText = t.filterAll;
-    if (btnHeater) btnHeater.innerText = t.filterHeater;
-    if (btnKombi) btnKombi.innerText = t.filterKombi;
+    const setText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = text;
+    };
+
+    setText('hero-title', t.heroTitle);
+    setText('hero-sub', t.heroSub);
+    setText('badge-1', t.badge1);
+    setText('badge-2', t.badge2);
+    setText('badge-3', t.badge3);
+    setText('products-title', t.productsTitle);
+    setText('text-all', t.filterAll);
+    setText('text-heater', t.filterHeater);
+    setText('text-kombi', t.filterKombi);
+    setText('location-text', t.locationText);
+    setText('cart-modal-title', t.cartTitle);
+    setText('total-label', t.totalLabel);
+    setText('name-label', t.nameLabel);
+    setText('phone-label', t.phoneLabel);
+    setText('complete-btn-text', t.completeBtn);
+
+    const nameInput = document.getElementById('customer-name');
+    if (nameInput) nameInput.placeholder = t.namePlaceholder;
 
     renderProducts();
+    updateCart();
 }
 
-// Məhsulları ekrana düzək (Filtr tətbiq olunmaqla)
+// Məhsulları ekrana düzək
 function renderProducts() {
     if (!productsContainer) return;
 
@@ -224,19 +243,29 @@ function renderProducts() {
 
     const t = translations[currentLang];
 
-    productsContainer.innerHTML = filteredProducts.map(product => `
+    productsContainer.innerHTML = filteredProducts.map(product => {
+        const catBadge = product.category === 'kombi' ? t.filterKombi : t.filterHeater;
+        return `
         <div class="product-card">
-            <img src="${product.image}" alt="${product.name}" onclick="openProductModal(${product.id})">
+            <span class="card-badge">${catBadge}</span>
+            <div class="img-wrapper" onclick="openProductModal(${product.id})">
+                <img src="${product.image}" alt="${product.name}">
+            </div>
             <div class="product-info">
                 <h3 class="product-title" onclick="openProductModal(${product.id})">${product.name}</h3>
                 <div class="product-price">${product.price.toFixed(2)} ₼</div>
                 <div class="product-actions">
-                    <button class="details-btn" onclick="openProductModal(${product.id})">${t.detailsBtn}</button>
-                    <button class="add-to-cart" onclick="addToCart(${product.id})">${t.addToCart}</button>
+                    <button class="details-btn" onclick="openProductModal(${product.id})">
+                        <i class="fas fa-info-circle"></i> ${t.detailsBtn}
+                    </button>
+                    <button class="add-to-cart" onclick="addToCart(${product.id})">
+                        <i class="fas fa-cart-plus"></i> ${t.addToCart}
+                    </button>
                 </div>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // Məhsul detallarını modalda göstər
@@ -250,17 +279,20 @@ function openProductModal(productId) {
         <div class="detail-grid">
             <img src="${product.image}" alt="${product.name}">
             <h2>${product.name}</h2>
-            <div class="product-price">${product.price.toFixed(2)} ₼</div>
+            <div class="product-price" style="margin-top:8px;">${product.price.toFixed(2)} ₼</div>
+            ${product.description ? `<p style="color:#475569; margin-bottom:12px;">\${product.description}</p>` : ''}
             <div class="contact-info">
                 <i class="fas fa-phone-alt"></i> Əlaqə nömrəsi: <a href="tel:${product.phone}">${product.phone}</a>
             </div>
             <div class="detail-specs">
                 <strong>Texniki xüsusiyyətlər və üstünlüklər:</strong>
                 <ul>
-                    ${product.specs.map(spec => `<li>${spec}</li>`).join('')}
+                    ${product.specs.map(spec => `<li>\${spec}</li>`).join('')}
                 </ul>
             </div>
-            <button class="add-to-cart" onclick="addToCart(${product.id}); closeProductModal();" style="margin-top: 15px; padding: 12px;">${t.addToCart}</button>
+            <button class="add-to-cart" onclick="addToCart(${product.id}); closeProductModal();" style="width:100%; margin-top: 18px; padding: 14px;">
+                <i class="fas fa-cart-plus"></i> ${t.addToCart}
+            </button>
         </div>
     `;
     if (productModal) productModal.classList.add('active');
@@ -272,50 +304,108 @@ function closeProductModal() {
 
 function closeSuccessModal() {
     const successModal = document.getElementById('success-modal');
-    if (successModal) {
-        successModal.style.setProperty('display', 'none', 'important');
+    if (successModal) successModal.classList.remove('active');
+}
+
+// Kənara kliklədikdə modalı bağla
+function closeOnOverlay(event, modalId) {
+    if (event.target.id === modalId) {
+        document.getElementById(modalId).classList.remove('active');
     }
+}
+
+// Bildiriş göstər
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    toast.innerText = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
 }
 
 // Səbətə əlavə et
 function addToCart(productId) {
     const product = products.find(p => p.id === productId);
-    cart.push(product);
+    if (!product) return;
+
+    const existing = cart.find(item => item.id === productId);
+    if (existing) {
+        existing.qty = (existing.qty || 1) + 1;
+    } else {
+        cart.push({ ...product, qty: 1 });
+    }
+
+    saveAndSyncCart();
+    showToast(translations[currentLang].toastAdded);
+}
+
+// Miqdarı dəyişdir
+function changeQty(productId, delta) {
+    const itemIndex = cart.findIndex(item => item.id === productId);
+    if (itemIndex === -1) return;
+
+    cart[itemIndex].qty = (cart[itemIndex].qty || 1) + delta;
+    if (cart[itemIndex].qty <= 0) {
+        cart.splice(itemIndex, 1);
+    }
+    saveAndSyncCart();
+}
+
+// Səbətdən sil
+function removeFromCart(productId) {
+    cart = cart.filter(item => item.id !== productId);
+    saveAndSyncCart();
+}
+
+function saveAndSyncCart() {
+    localStorage.setItem('bathshop_cart', JSON.stringify(cart));
     updateCart();
 }
 
 // Səbəti yenilə
 function updateCart() {
-    if (cartCount) cartCount.innerText = cart.length;
+    const totalItems = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
+    if (cartCount) cartCount.innerText = totalItems;
     
     const t = translations[currentLang];
 
     if (cart.length === 0) {
-        if (cartItemsContainer) cartItemsContainer.innerHTML = `<p>${t.cartEmpty}</p>`;
+        if (cartItemsContainer) {
+            cartItemsContainer.innerHTML = `
+                <div class="empty-cart-box">
+                    <i class="fas fa-shopping-basket"></i>
+                    <p>${t.cartEmpty}</p>
+                </div>
+            `;
+        }
         if (cartTotal) cartTotal.innerText = '0.00';
         return;
     }
 
     if (cartItemsContainer) {
-        cartItemsContainer.innerHTML = cart.map((item, index) => `
+        cartItemsContainer.innerHTML = cart.map(item => {
+            const qty = item.qty || 1;
+            return `
             <div class="cart-item">
-                <div>
+                <div class="cart-item-info">
                     <h4>${item.name}</h4>
-                    <small>${item.price.toFixed(2)} ₼</small>
+                    <small>${(item.price * qty).toFixed(2)} ₼ (${item.price.toFixed(2)} ₼ × ${qty})</small>
                 </div>
-                <button onclick="removeFromCart(${index})" style="background:none; border:none; color:red; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                <div class="qty-controls">
+                    <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
+                    <span>${qty}</span>
+                    <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+                </div>
+                <button class="remove-btn" onclick="removeFromCart(${item.id})" title="Sil">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
-    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    const total = cart.reduce((sum, item) => sum + item.price * (item.qty || 1), 0);
     if (cartTotal) cartTotal.innerText = total.toFixed(2);
-}
-
-// Səbətdən sil
-function removeFromCart(index) {
-    cart.splice(index, 1);
-    updateCart();
 }
 
 // Səbət pəncərəsini aç/bağla
@@ -328,6 +418,7 @@ async function checkoutOrder() {
     const nameInput = document.getElementById('customer-name');
     const phoneInput = document.getElementById('customer-phone');
     const errorDiv = document.getElementById('checkout-error');
+    const submitBtn = document.getElementById('checkout-submit-btn');
 
     if (errorDiv) {
         errorDiv.style.display = 'none';
@@ -345,9 +436,9 @@ async function checkoutOrder() {
     const customerName = nameInput ? nameInput.value.trim() : '';
     const customerPhone = phoneInput ? phoneInput.value.trim() : '';
 
-    if (!customerName) {
+    if (customerName.length < 2) {
         if (errorDiv) {
-            errorDiv.textContent = 'Lütfən ad və soyadınızı daxil edin!';
+            errorDiv.textContent = 'Lütfən ad və soyadınızı düzgün daxil edin!';
             errorDiv.style.display = 'block';
         }
         return;
@@ -355,7 +446,7 @@ async function checkoutOrder() {
 
     const countrySelect = document.getElementById('country-code');
     const selectedOption = countrySelect ? countrySelect.options[countrySelect.selectedIndex] : null;
-    const requiredLength = selectedOption ? parseInt(selectedOption.getAttribute('data-length')) : 10;
+    const requiredLength = selectedOption ? parseInt(selectedOption.getAttribute('data-length')) : 9;
 
     const phoneRegex = new RegExp(`^\\d{${requiredLength}}$`);
     if (!phoneRegex.test(customerPhone)) {
@@ -368,21 +459,19 @@ async function checkoutOrder() {
 
     const countryCode = countrySelect ? countrySelect.value : '+994';
     const fullPhoneNumber = countryCode + customerPhone;
-
-    let numericTotal = 0;
-    if (typeof cartTotal !== 'undefined' && cartTotal.textContent) {
-        numericTotal = parseFloat(cartTotal.textContent.replace(/[^\d.]/g, '')) || 0;
-    }
+    const totalAmount = cart.reduce((sum, item) => sum + item.price * (item.qty || 1), 0);
 
     const orderData = {
         name: customerName,
         phone: fullPhoneNumber,
         items: cart.map(item => ({
-            name: item.name,
-            price: item.price
+            name: `${item.name} (x${item.qty || 1})`,
+            price: parseFloat((item.price * (item.qty || 1)).toFixed(2))
         })),
-        total: numericTotal
+        total: parseFloat(totalAmount.toFixed(2))
     };
+
+    if (submitBtn) submitBtn.disabled = true;
 
     try {
         const response = await fetch(`${BACKEND_URL}/api/checkout`, {
@@ -395,22 +484,24 @@ async function checkoutOrder() {
 
         if (response.ok) {
             cart = [];
+            saveAndSyncCart();
             if (nameInput) nameInput.value = '';
             if (phoneInput) phoneInput.value = '';
-            updateCart();
             toggleCart();
 
             const successModal = document.getElementById('success-modal');
-            if (successModal) {
-                successModal.style.display = 'flex';
-            }
+            if (successModal) successModal.classList.add('active');
+        } else {
+            throw new Error("Server error");
         }
     } catch (error) {
         console.error("Xəta:", error);
         if (errorDiv) {
-            errorDiv.textContent = 'Serverlə əlaqə qurularkən xəta baş verdi.';
+            errorDiv.textContent = 'Serverlə əlaqə qurularkən xəta baş verdi. Yenidən cəhd edin.';
             errorDiv.style.display = 'block';
         }
+    } finally {
+        if (submitBtn) submitBtn.disabled = false;
     }
 }
 
@@ -434,3 +525,4 @@ function updatePhoneMask() {
 
 // İlkin işə düşmə
 renderProducts();
+updateCart();
